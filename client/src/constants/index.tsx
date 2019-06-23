@@ -44,6 +44,15 @@ export type USERS_SUCCESS = typeof USERS_SUCCESS;
 export const USERS_ERROR = 'USERS_ERROR';
 export type USERS_ERROR = typeof USERS_ERROR;
 
+export const ITEMS_LOADING = 'ITEMS_LOADING';
+export type ITEMS_LOADING = typeof ITEMS_LOADING;
+
+export const ITEMS_SUCCESS = 'ITEMS_SUCCESS';
+export type ITEMS_SUCCESS = typeof ITEMS_SUCCESS;
+
+export const ITEMS_ERROR = 'ITEMS_ERROR';
+export type ITEMS_ERROR = typeof ITEMS_ERROR;
+
 export enum QuestionStatus {
   STANDARD = 'std',
   EVALUATE = 'eval',

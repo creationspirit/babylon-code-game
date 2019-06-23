@@ -1,17 +1,16 @@
 import { loginError, loginSuccess, loginRequest, logoutUser } from '../actions/auth';
-import { Dispatch } from 'redux';
 import { ThunkResult } from './index';
 import { gameAPI } from '../config/request';
 
 export const login = (edgarToken: string): ThunkResult<void> => {
-  return async (dispatch: Dispatch) => {
+  return async dispatch => {
     dispatch(loginRequest());
     try {
       const response = await gameAPI.post('/users/login', { edgarToken });
       localStorage.setItem('token', response.data.token);
       dispatch(loginSuccess(response.data.user));
     } catch (e) {
-      if (e.response.status === 400) {
+      if (e.response && e.response.status === 400) {
         dispatch(loginError(e.response.data.message));
       } else {
         dispatch(loginError('Login failed'));
@@ -20,15 +19,15 @@ export const login = (edgarToken: string): ThunkResult<void> => {
   };
 };
 
-export const logout = () => {
-  return async (dispatch: Dispatch) => {
+export const logout = (): ThunkResult<void> => {
+  return async dispatch => {
     localStorage.removeItem('token');
     dispatch(logoutUser());
   };
 };
 
 export const fetchUserData = (): ThunkResult<void> => {
-  return async (dispatch: Dispatch) => {
+  return async dispatch => {
     const token = localStorage.token;
     if (token) {
       try {

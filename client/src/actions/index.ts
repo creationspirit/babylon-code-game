@@ -6,6 +6,7 @@ import { ILoginSuccess, ILoginError, ILoginRequest, ILogout } from './auth';
 import { IStagesError, IStagesLoading, IStagesSuccess } from './stages';
 import { IAchievementsError, IAchievementsLoading, IAchievementsSuccess } from './achievements';
 import { IUsersError, IUsersLoading, IUsersSuccess } from './users';
+import { IItemsError, IItemsLoading, IItemsSuccess } from './items';
 
 export type IActions =
   | IAddGameClient
@@ -22,7 +23,10 @@ export type IActions =
   | IAchievementsSuccess
   | IUsersError
   | IUsersLoading
-  | IUsersSuccess;
+  | IUsersSuccess
+  | IItemsError
+  | IItemsLoading
+  | IItemsSuccess;
 
 export interface IAddGameClient extends Action {
   type: constants.ADD_GAME_CLIENT;

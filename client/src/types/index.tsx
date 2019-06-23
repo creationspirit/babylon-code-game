@@ -28,10 +28,17 @@ export interface IUserState {
   error: string | null;
 }
 
+export interface IItemState {
+  loading: boolean;
+  items: [];
+  error: string | null;
+}
+
 export interface IRootState {
   gameClient: IClientState;
   auth: IAuthState;
   stages: IStageState;
   achievements: IAchievementState;
   users: IUserState;
+  items: IItemState;
 }

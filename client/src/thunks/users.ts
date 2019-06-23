@@ -1,10 +1,9 @@
 import { usersError, usersSuccess, usersLoading } from '../actions/users';
-import { Dispatch } from 'redux';
 import { ThunkResult } from './index';
 import { gameAPI } from '../config/request';
 
 export const fetchUsers = (): ThunkResult<void> => {
-  return async (dispatch: Dispatch) => {
+  return async dispatch => {
     dispatch(usersLoading());
     const token = localStorage.token;
     try {

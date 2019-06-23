@@ -1,10 +1,9 @@
 import { stagesError, stagesSuccess, stagesLoading } from '../actions/stages';
-import { Dispatch } from 'redux';
 import { ThunkResult } from './index';
 import { gameAPI } from '../config/request';
 
 export const fetchStages = (): ThunkResult<void> => {
-  return async (dispatch: Dispatch) => {
+  return async dispatch => {
     dispatch(stagesLoading());
     const token = localStorage.token;
     try {

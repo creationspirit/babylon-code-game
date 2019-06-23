@@ -9,7 +9,7 @@ export class Item {
   @Column({ length: 100 })
   name!: string;
 
-  @Column({ length: 200 })
+  @Column({ length: 400 })
   description!: string;
 
   @Column({ length: 200 })

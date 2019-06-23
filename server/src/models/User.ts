@@ -45,7 +45,7 @@ export class User {
   @OneToMany(type => UserStageStats, stagestats => stagestats.user, { cascade: true, eager: true })
   stageStats!: UserStageStats[];
 
-  @OneToMany(type => UserItems, userItems => userItems.user)
+  @OneToMany(type => UserItems, userItems => userItems.user, { cascade: true, eager: true })
   items!: UserItems[];
 
   @ManyToMany(type => Achievement, achievement => achievement.users)

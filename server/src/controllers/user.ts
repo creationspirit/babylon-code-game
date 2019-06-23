@@ -17,38 +17,47 @@ router.post('/login', async (req: Request, res: Response) => {
   try {
     const edgarUser = await fetchUser(edgarToken);
     let user = await repository.findOne({ edgarId: edgarUser.id });
+
+    const stageList = await stageRepository.find({ select: ['id'] });
+
     if (!user) {
       user = new User();
-    }
-    user.loadFromEdgarResponse(edgarUser);
+      user.loadFromEdgarResponse(edgarUser);
+      user.stats = new UserStats();
+      user.stats.experience = 0;
+      user.stats.level = 1;
+      user.stats.loc = 0;
 
-    if (!user.stats) {
-      const stats = new UserStats();
-      stats.experience = 0;
-      stats.level = 1;
-      stats.loc = 0;
-      user.stats = stats;
-    }
-    if (user.stageStats.length === 1 && user.stageStats[0].stage === null) {
-      user.stageStats = [];
-    }
-    const stageList = await stageRepository.find({ select: ['id'] });
-    stageList.forEach((stage: Stage) => {
-      const stageStat = (user as User).stageStats.find(
-        (s: UserStageStats) => s.stage.id === stage.id
-      );
-      if (!stageStat) {
+      const stageStatsArray: UserStageStats[] = [];
+      stageList.forEach((stage: Stage) => {
         const newStageStats = new UserStageStats();
         newStageStats.stage = stage;
-        newStageStats.user = user as User;
         newStageStats.level = 1;
         newStageStats.loc = 0;
-        (user as User).stageStats.push(newStageStats);
+        stageStatsArray.push(newStageStats);
+      });
+      user.stageStats = stageStatsArray;
+    } else {
+      if (user.stageStats.length === 1 && user.stageStats[0].stage === null) {
+        user.stageStats = [];
       }
-    });
-    const newUser = await repository.save(user);
-    const token = await user.generateAuthToken();
-    res.send({ user: newUser, token });
+      stageList.forEach((stage: Stage) => {
+        const stageStat = (user as User).stageStats.find(
+          (s: UserStageStats) => s.stage.id === stage.id
+        );
+        if (!stageStat) {
+          const newStageStats = new UserStageStats();
+          newStageStats.stage = stage;
+          newStageStats.level = 1;
+          newStageStats.loc = 0;
+          (user as User).stageStats.push(newStageStats);
+        }
+      });
+    }
+    console.log(user);
+    const savedUser = await repository.save(user);
+    const token = await savedUser.generateAuthToken();
+    res.send({ user: savedUser, token });
   } catch (e) {
     console.log(e);
     res.status(400).send({ message: 'This token is not valid.' });

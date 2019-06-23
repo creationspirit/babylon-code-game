@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, getRepository, Repository } from 'typeorm';
+import { MigrationInterface, QueryRunner, getRepository } from 'typeorm';
 import { Achievement } from '../models/Achievement';
 import { AchievementRule } from '../models/AchievementRule';
 
