@@ -106,6 +106,11 @@ export class GameRoom extends Room<StateHandler> {
     if (message.type === MessageType.COLLECT) {
       this.completeQuestion(data.id);
     }
+
+    if (message.type === MessageType.USE_FUTURE_GADGET) {
+      this.useFutureGadet(this.state.players[client.sessionId].id);
+      // this.send(client, { type: MessageType.FUTURE_GADGET_USED });
+    }
   }
 
   onUpdate() {
@@ -208,5 +213,14 @@ export class GameRoom extends Room<StateHandler> {
         { afterNextPatch: true }
       );
     } catch (e) {}
+  }
+
+  async useFutureGadet(userId: number) {
+    try {
+      await this.ruleEngine.useFutureGadget(userId);
+      this.timer += 300000;
+    } catch (e) {
+      console.log(e.message);
+    }
   }
 }

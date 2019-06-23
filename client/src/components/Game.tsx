@@ -30,6 +30,7 @@ class PageWithScene extends React.Component<IGameProps> {
       this.props.client as Colyseus.Client,
       this.props.match.params.roomId,
       this.props.location.state,
+      this.props.user.items,
       this.setTaskInProgress,
       this.removeTaskInProgress,
       this.setQuestion,

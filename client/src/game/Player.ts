@@ -16,13 +16,18 @@ export class Player {
   camera!: BABYLON.UniversalCamera;
   actionTriggerBox!: BABYLON.Mesh;
   id: string;
+  futureGadgets: number = 0;
 
   inSolvingAreaOf?: Pickup;
   isSolving = false;
 
-  constructor(scene: BABYLON.Scene, id: string) {
+  constructor(scene: BABYLON.Scene, id: string, playerItems: any) {
     this.scene = scene;
     this.id = id;
+    const futureGadget = playerItems.find((item: any) => item.item.name === 'Future Gadget 204');
+    if (futureGadget) {
+      this.futureGadgets = futureGadget.amount;
+    }
   }
 
   init(position: BABYLON.Vector3) {

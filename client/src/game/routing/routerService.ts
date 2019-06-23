@@ -9,6 +9,7 @@ export const SOLUTION_UPDATE: string = 'supd';
 export const SOLVE_ATTEMPT: string = 'solv';
 export const COLLECT: string = 'coll';
 export const DISPLAY_REWARD: string = 'drew';
+export const USE_FUTURE_GADGET: string = 'ufg';
 
 export class RouterService {
   client: Colyseus.Client;
@@ -243,6 +244,12 @@ export class RouterService {
     this.room.send({
       type: COLLECT,
       data: { id },
+    });
+  }
+
+  sendUseFutureGadget() {
+    this.room.send({
+      type: USE_FUTURE_GADGET,
     });
   }
 }

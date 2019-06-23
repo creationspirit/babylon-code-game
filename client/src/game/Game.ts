@@ -32,11 +32,13 @@ export class Game {
   private prefabs: { [id: string]: BABYLON.Mesh } = {};
   private lights: Lights;
   player!: Player;
+  private playerItems: any;
   private rivals: { [id: string]: Rival } = {};
   private area: Area;
   private pickups: { [id: string]: Pickup } = {};
   timer!: GUI.TextBlock;
   scoreboard!: GUI.TextBlock;
+  button!: GUI.Button;
   private questionNum: number;
   private solvedQuestionsNum: number;
   private mode: string;
@@ -57,6 +59,7 @@ export class Game {
     client: Colyseus.Client,
     roomId: string,
     roomData: any,
+    userItems: any,
     setTaskInProgress: () => void,
     removeTaskInProgress: () => void,
     setQuestion: (question: any) => void,
@@ -86,6 +89,8 @@ export class Game {
 
     this.questionNum = 0;
     this.solvedQuestionsNum = 0;
+
+    this.playerItems = userItems;
 
     // Store references to react state callbacks
     this.setTaskInProgress = setTaskInProgress;
@@ -154,10 +159,13 @@ export class Game {
   initGameStateAndRun(levelConfig: any) {
     this.area.init(levelConfig.corridors, this.prefabs);
     this.lights.init(levelConfig.lights);
-    this.player = new Player(this.scene, this.router.room.sessionId);
+    this.player = new Player(this.scene, this.router.room.sessionId, this.playerItems);
     this.player.init(createVector(levelConfig.spawnPoint));
     this.player.setupControls(this.scene.actionManager as BABYLON.ActionManager);
     this.setupPlayerActions();
+    if (this.mode === 'game') {
+      this.button = this.createUseItemButton(this.player.futureGadgets);
+    }
     this.run();
   }
 
@@ -356,5 +364,34 @@ export class Game {
     image.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
     this.advancedTexture.addControl(image);
+  }
+
+  createUseItemButton(itemAmount: number) {
+    const button = GUI.Button.CreateImageButton(
+      'but',
+      'Future Gadget 204',
+      `${process.env.PUBLIC_URL}/icons/time.svg`
+    );
+    button.width = '450px';
+    button.height = '100px';
+    button.background = 'black';
+    button.paddingTop = '10px';
+    button.paddingRight = '10px';
+    button.alpha = 0.6;
+    button.cornerRadius = 20;
+    button.color = 'white';
+    button.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    button.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    (button.textBlock as GUI.TextBlock).fontSize = 30;
+    (button.textBlock as GUI.TextBlock).text = `Future Gadget 204 (${itemAmount})`;
+
+    button.onPointerClickObservable.add(() => {
+      this.router.sendUseFutureGadget();
+      this.player.futureGadgets -= 1;
+      (button.textBlock as GUI.TextBlock).text = `Future Gadget 204 (${this.player.futureGadgets})`;
+    });
+
+    this.advancedTexture.addControl(button);
+    return button;
   }
 }

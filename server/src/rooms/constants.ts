@@ -5,6 +5,8 @@ export enum MessageType {
   SOLVE_ATTEMPT = 'solv',
   COLLECT = 'coll',
   DISPLAY_REWARD = 'drew',
+  USE_FUTURE_GADGET = 'ufg',
+  FUTURE_GADGET_USED = 'fgu',
 }
 
 export enum GameStatus {

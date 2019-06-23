@@ -20,7 +20,6 @@ router.get('/', auth, async (req: Request, res: Response) => {
 
 router.post('/buy', auth, async (req: Request, res: Response) => {
   const { itemId, amount } = req.body;
-  console.log(itemId, amount);
   try {
     const repository = getRepository(UserItems);
     const itemRepository = getRepository(Item);
@@ -30,17 +29,13 @@ router.post('/buy', auth, async (req: Request, res: Response) => {
     if (item.price * amount > req.user.stats.loc) {
       throw new Error('Not enough LOC.');
     }
-    console.log(req.user);
     let userItem = await repository.findOne({ where: { item: itemId, user: req.user.id } });
-    console.log('userItem', userItem);
     if (userItem) {
-      console.log('updating old');
       await repository.update(
         { item: itemId, user: req.user.id },
         { amount: userItem.amount + amount }
       );
     } else {
-      console.log('making new');
       userItem = new UserItems();
       userItem.item = itemId;
       userItem.user = req.user;
