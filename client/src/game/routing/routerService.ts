@@ -3,6 +3,7 @@ import * as BABYLON from 'babylonjs';
 
 import { Game } from '../Game';
 import { GameStatus } from '../../constants';
+import { createVector } from '../utils';
 
 export const PLAYER_MOVEMENT: string = 'move';
 export const SOLUTION_UPDATE: string = 'supd';
@@ -10,6 +11,8 @@ export const SOLVE_ATTEMPT: string = 'solv';
 export const COLLECT: string = 'coll';
 export const DISPLAY_REWARD: string = 'drew';
 export const USE_FUTURE_GADGET: string = 'ufg';
+export const QUICK_QUESTION: string = 'qq';
+export const QUICK_QUESTION_ANSWER: string = 'qqa';
 
 export class RouterService {
   client: Colyseus.Client;
@@ -36,8 +39,8 @@ export class RouterService {
       console.log('client joined successfully');
 
       this.room.onMessage.add((message: any) => {
-        console.log(message);
         if (message.type === 'LVL_INIT') {
+          console.log(message);
           game.initGameStateAndRun(message.data);
           this.setupMessageListeners(game);
         }
@@ -68,6 +71,7 @@ export class RouterService {
         );
       });
       game.timer.text = state.timer;
+      game.dude.update(new BABYLON.Vector3(state.dude.x, 0.2, state.dude.y));
     });
 
     this.room.state.onChange = (changes: any) => {
@@ -82,6 +86,10 @@ export class RouterService {
           } else if (change.value === GameStatus.LOSE) {
             game.setGameResult(GameStatus.LOSE);
           }
+        }
+
+        if (change.field === 'dude') {
+          game.dude.update(new BABYLON.Vector3(change.value.x, 0.2, change.value.y));
         }
       });
     };
@@ -104,6 +112,9 @@ export class RouterService {
 
     this.room.state.players.onChange = (player: any, key: string) => {
       game.updatePlayer(key, new BABYLON.Vector3(player.x, 0.2, player.y));
+      if (key === this.room.sessionId) {
+        game.player.disableOrEnableMovement(player.caught);
+      }
     };
 
     this.room.state.players.onRemove = (player: any, key: string) => {
@@ -118,11 +129,18 @@ export class RouterService {
 
     this.room.onMessage.add((message: any) => {
       if (message.type === DISPLAY_REWARD) {
-        console.log(message);
         const { id, loc, exp } = message.data;
         const notificationText = `Question ${id} solved!\nREWARDS:\nLOC ${loc}\nXP ${exp}`;
         game.createNotificationGUI(notificationText, 6000);
       }
+
+      if (message.type === QUICK_QUESTION) {
+        game.setQuickQuestion(message.data);
+      }
+    });
+
+    this.room.onLeave.add(() => {
+      game.returnHome();
     });
   }
 
@@ -250,6 +268,16 @@ export class RouterService {
   sendUseFutureGadget() {
     this.room.send({
       type: USE_FUTURE_GADGET,
+    });
+  }
+
+  sendQuickQuestionAnswer(questionId: number, answerId: number) {
+    this.room.send({
+      type: QUICK_QUESTION_ANSWER,
+      data: {
+        questionId,
+        answerId,
+      },
     });
   }
 }

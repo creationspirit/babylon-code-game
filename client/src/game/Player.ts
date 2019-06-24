@@ -17,6 +17,7 @@ export class Player {
   actionTriggerBox!: BABYLON.Mesh;
   id: string;
   futureGadgets: number = 0;
+  caught: boolean = false;
 
   inSolvingAreaOf?: Pickup;
   isSolving = false;
@@ -53,6 +54,14 @@ export class Player {
       this.scene.getEngine().getRenderingCanvas() as HTMLCanvasElement,
       true
     );
+  }
+
+  disableOrEnableMovement(caught: boolean) {
+    if (this.caught === caught) {
+      return;
+    }
+    this.caught = caught;
+    this.camera.speed = this.caught ? 0 : this.speed;
   }
 
   getActionManager() {

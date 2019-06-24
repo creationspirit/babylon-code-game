@@ -11,6 +11,9 @@ import { Rival } from './Rival';
 import { RouterService } from './routing/routerService';
 import { GAME_ASSETS_URL, SKYBOX_TEXTURES_URL } from './constants';
 import { createVector } from './utils';
+import { Vector3 } from 'babylonjs';
+import { runInThisContext } from 'vm';
+import { Dude } from './Dude';
 
 BABYLON.ParticleHelper.BaseAssetsUrl = `${process.env.PUBLIC_URL}/assets/`;
 // BABYLON.Constants.PARTICLES_BaseAssetsUrl = ''
@@ -22,6 +25,7 @@ export enum PrefabID {
   CORRIDOR_4 = 'Corridor4',
   CORRIDOR_T = 'CorridorT',
   CORRIDOR_L = 'CorridorL',
+  DUDE = 'him',
 }
 
 export class Game {
@@ -34,6 +38,7 @@ export class Game {
   player!: Player;
   private playerItems: any;
   private rivals: { [id: string]: Rival } = {};
+  dude!: Dude;
   private area: Area;
   private pickups: { [id: string]: Pickup } = {};
   timer!: GUI.TextBlock;
@@ -51,8 +56,10 @@ export class Game {
   private setTaskInProgress: () => void;
   private removeTaskInProgress: () => void;
   setQuestion: (question: any) => void;
+  setQuickQuestion: (quickQuestion: any) => void;
   resetState: (questionId: number) => void;
   setGameResult: (gameResult: string) => void;
+  returnHome: () => void;
 
   constructor(
     args: ISceneEventArgs,
@@ -63,8 +70,10 @@ export class Game {
     setTaskInProgress: () => void,
     removeTaskInProgress: () => void,
     setQuestion: (question: any) => void,
+    setQuickQuestion: (question: any) => void,
     resetState: (questionId: number) => void,
-    setGameResult: (gameResult: string) => void
+    setGameResult: (gameResult: string) => void,
+    returnHome: () => void
   ) {
     this.canvas = args.canvas as HTMLCanvasElement;
     this.engine = args.engine;
@@ -96,8 +105,10 @@ export class Game {
     this.setTaskInProgress = setTaskInProgress;
     this.removeTaskInProgress = removeTaskInProgress;
     this.setQuestion = setQuestion;
+    this.setQuickQuestion = setQuickQuestion;
     this.resetState = resetState;
     this.setGameResult = setGameResult;
+    this.returnHome = returnHome;
   }
 
   private createMeshTask(taskId: string, fileName: string) {
@@ -122,6 +133,13 @@ export class Game {
     this.prefabs[PrefabID.PLAYER] = prefabMesh;
   }
 
+  private storeDudePrefab(task: BABYLON.MeshAssetTask) {
+    task.loadedMeshes[0].scaling = new Vector3(0.034, 0.034, 0.034);
+    const prefabMesh = task.loadedMeshes[0] as BABYLON.Mesh;
+    prefabMesh.setEnabled(false);
+    this.prefabs[PrefabID.DUDE] = task.loadedMeshes[0] as BABYLON.Mesh;
+  }
+
   load() {
     // this.scene.debugLayer.show();
     this.scene.gravity = new BABYLON.Vector3(0, -5, 0);
@@ -143,6 +161,7 @@ export class Game {
     const corridorLTask = this.createMeshTask('corridorL', 'corridorL.babylon');
     const pickupTask = this.createMeshTask('pickup', 'pickup.babylon');
     const playerTask = this.createMeshTask('player', 'player.babylon');
+    const dudeTask = this.createMeshTask('dude', 'dude.babylon');
 
     corridor4Task.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR_4, task);
     corridorTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR, task);
@@ -150,6 +169,7 @@ export class Game {
     corridorLTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR_L, task);
     pickupTask.onSuccess = task => this.storePrefab(PrefabID.PICKUP, task);
     playerTask.onSuccess = task => this.storePlayerPrefab(task);
+    dudeTask.onSuccess = task => this.storeDudePrefab(task);
 
     this.assetsManager.onFinish = tasks => {
       this.router.connect(this);
@@ -159,6 +179,8 @@ export class Game {
   initGameStateAndRun(levelConfig: any) {
     this.area.init(levelConfig.corridors, this.prefabs);
     this.lights.init(levelConfig.lights);
+    this.dude = new Dude(this.scene, this.prefabs[PrefabID.DUDE], 'dude1');
+    this.dude.init(createVector(levelConfig.spawnPoint));
     this.player = new Player(this.scene, this.router.room.sessionId, this.playerItems);
     this.player.init(createVector(levelConfig.spawnPoint));
     this.player.setupControls(this.scene.actionManager as BABYLON.ActionManager);

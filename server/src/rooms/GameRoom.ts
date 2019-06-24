@@ -29,6 +29,7 @@ export class GameRoom extends Room<StateHandler> {
   private timer!: number;
   private config!: IConfig;
   private ruleEngine!: RuleEngine;
+  private quickQuestions: any[] = [];
 
   // When room is initialized
   onInit(options: any) {
@@ -111,13 +112,26 @@ export class GameRoom extends Room<StateHandler> {
       this.useFutureGadet(this.state.players[client.sessionId].id);
       // this.send(client, { type: MessageType.FUTURE_GADGET_USED });
     }
+
+    if (message.type === MessageType.QUICK_QUESTION_ANSWER) {
+      this.handleQuickQuestionAnswer(client, data.questionId, data.answerId);
+    }
   }
 
   onUpdate() {
     Object.keys(this.world.players).forEach(key => {
       const pos = this.world.players[key].playerMesh.position;
       this.state.players[key].updatePosition(pos);
+
+      if (!this.state.players[key].caught && this.world.players[key].caught) {
+        this.state.players[key].caught = true;
+        this.sendQuickQuestion(key);
+      }
+      if (this.state.players[key].caught && !this.world.players[key].caught) {
+        this.state.players[key].caught = false;
+      }
     });
+    this.state.dude.updatePosition(this.world.dude.dudeMesh.position);
   }
 
   // When a client leaves the room
@@ -129,6 +143,35 @@ export class GameRoom extends Room<StateHandler> {
   // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
   onDispose() {
     this.world.dispose();
+  }
+
+  sendQuickQuestion(sessionId: string) {
+    const client = this.clients.find(c => c.sessionId === sessionId);
+    const question = this.quickQuestions[this.quickQuestions.length - 1];
+    console.log(question);
+    this.send(client as Client, { type: MessageType.QUICK_QUESTION, data: question });
+  }
+
+  handleQuickQuestionAnswer(client: Client, questionId: number, answerId: number) {
+    const question = this.quickQuestions.find(qq => qq.id === questionId);
+    const answer = question.answers.find((a: any) => a.id === answerId);
+
+    this.quickQuestions.pop();
+    this.world.players[client.sessionId].caught = false;
+    this.world.dude.removePlayerFromChaseList(this.world.players[client.sessionId]);
+
+    if (answerId === -2) {
+      return client.close();
+    }
+
+    if (answerId === -1) {
+      // handle icecream use
+      return;
+    }
+
+    if (!answer.is_correct) {
+      client.close();
+    }
   }
 
   async getQuestions() {
@@ -146,10 +189,19 @@ export class GameRoom extends Room<StateHandler> {
     questions = questions.filter((q: any) => {
       return q.id_difficulty_level === this.config.difficulty;
     });
-    // choose random questions from a pool of questions
-    questions = getRandomArrayElements(questions, LEVEL.pickups.length);
+    let quickQuestions = questions.filter((q: any) => {
+      return q.type_name === 'Classic (ABC) question';
+    });
+    let cQuestions = questions.filter((q: any) => {
+      return q.type_name === 'Evaluated C-lang question';
+    });
 
-    questions.forEach((questionData: any, index: number) => {
+    // choose random questions from a pool of questions
+    quickQuestions = getRandomArrayElements(quickQuestions, 3);
+    cQuestions = getRandomArrayElements(cQuestions, LEVEL.pickups.length);
+
+    this.quickQuestions = quickQuestions;
+    cQuestions.forEach((questionData: any, index: number) => {
       this.world.addPickup(questionData.id, createVector(LEVEL.pickups[index].position));
       this.state.addQuestion(
         questionData,

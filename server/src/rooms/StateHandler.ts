@@ -3,6 +3,7 @@ import { PlayerState } from './state/PlayerState';
 import { QuestionState } from './state/QuestionState';
 import { msToMinSec } from '../utils/gameUtils';
 import { GameStatus } from './constants';
+import { DudeState } from './state/DudeState';
 
 export class StateHandler extends Schema {
   @type('string')
@@ -10,6 +11,9 @@ export class StateHandler extends Schema {
 
   @type('string')
   status: string;
+
+  @type(DudeState)
+  dude: DudeState;
 
   @type({ map: PlayerState })
   players = new MapSchema<PlayerState>();
@@ -21,6 +25,7 @@ export class StateHandler extends Schema {
     super();
     this.timer = msToMinSec(time);
     this.status = GameStatus.ONGOING;
+    this.dude = new DudeState();
   }
 
   addPlayer(clientId: string, player: PlayerState): void {

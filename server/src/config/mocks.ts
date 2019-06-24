@@ -220,4 +220,5 @@ export const LEVEL_CONFIG_MOCK = {
     },
   ],
   spawnPoint: { x: 9, y: 2, z: 0 },
+  dudeSpawnPoint: { x: -15, y: 1, z: 0 },
 };

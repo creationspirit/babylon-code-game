@@ -1,6 +1,6 @@
 import { StateHandler } from './StateHandler';
 import { QuestionState } from './state/QuestionState';
-import { getRepository, In } from 'typeorm';
+import { getRepository, In, FindConditions } from 'typeorm';
 import { UserStageStats } from '../models/UserStageStats';
 import { UserStats } from '../models/UserStats';
 import { UserItems } from '../models/UserItems';
@@ -56,6 +56,8 @@ export default class RuleEngine {
     if (userItem.amount === 0) {
       throw new Error('0 Future Gadgets.');
     }
-    await repository.update({ item: 1, user: userId }, { amount: userItem.amount - 1 });
+    await repository.update({ item: 1, user: userId } as FindConditions<UserItems>, {
+      amount: userItem.amount - 1,
+    });
   }
 }

@@ -45,10 +45,19 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-30%, -50%);
   z-index: 0;
   width: 40%;
   height: 20vh;
+}
+
+.quick-question {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  width: 40%;
 }
 
 .tests-container {

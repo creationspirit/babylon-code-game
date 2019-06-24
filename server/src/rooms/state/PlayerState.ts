@@ -8,6 +8,9 @@ export class PlayerState extends Schema {
   @type('string')
   name: string;
 
+  @type('boolean')
+  caught: boolean;
+
   @type('number')
   x: number | undefined;
 
@@ -20,6 +23,7 @@ export class PlayerState extends Schema {
     this.x = x;
     this.y = y;
     this.id = id;
+    this.caught = false;
   }
 
   updatePosition(position: Vector3) {

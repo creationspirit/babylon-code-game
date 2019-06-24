@@ -5,6 +5,7 @@ import { Pickup } from './Pickup';
 import { Player } from './Player';
 import { createVector } from '../utils/gameUtils';
 import { XMLHttpRequest } from 'xhr2';
+import { Dude } from './Dude';
 
 (global as any).XMLHttpRequest = XMLHttpRequest;
 
@@ -26,6 +27,7 @@ export class World {
 
   private pickups: { [id: string]: Pickup } = {};
   players: { [id: string]: Player } = {};
+  dude: Dude;
 
   constructor() {
     this.engine = new BABYLON.NullEngine();
@@ -33,6 +35,7 @@ export class World {
 
     this.assetsManager = new BABYLON.AssetsManager(this.scene);
     this.area = new Area(this.scene);
+    this.dude = new Dude(this.scene, 'dude1');
   }
 
   private createMeshTask(taskId: string, fileName: string) {
@@ -51,6 +54,7 @@ export class World {
   init(levelConfig: any) {
     this.scene.gravity = new BABYLON.Vector3(0, -5, 0);
     this.scene.collisionsEnabled = true;
+    this.dude.init(createVector(levelConfig.dudeSpawnPoint));
     this.scene.actionManager = new BABYLON.ActionManager(this.scene);
     // Not sure why a camera is needed on the server side...
     const camera = new BABYLON.ArcRotateCamera(
@@ -81,6 +85,7 @@ export class World {
       this.scene.executeWhenReady(() => {
         console.log('scene ready');
         this.engine.runRenderLoop(() => {
+          this.dude.move();
           this.scene.render();
         });
       });
@@ -90,7 +95,7 @@ export class World {
 
   createPlayer(id: string, position: BABYLON.Vector3): void {
     const player = new Player(this.scene, id);
-    player.init(position);
+    player.init(position, this.dude);
 
     this.players[id] = player;
   }
@@ -98,7 +103,7 @@ export class World {
   removePlayer(id: string) {
     const player: Player = this.players[id];
     if (player !== undefined) {
-      player.playerMesh.dispose();
+      player.dispose();
     }
     delete this.players[id];
   }

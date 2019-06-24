@@ -10,6 +10,7 @@ import { Game } from '../game/Game';
 import { Pickup } from '../game/Pickup';
 import { IRootState } from '../types';
 import { GameStatus } from '../constants';
+import QuickQuestion from './fragments/QuickQuestion';
 
 export interface IGameProps {
   client: Colyseus.Client | null;
@@ -20,7 +21,7 @@ export interface IGameProps {
 }
 
 class PageWithScene extends React.Component<IGameProps> {
-  state = { taskInProgress: false, question: null, gameResult: null };
+  state = { taskInProgress: false, question: null, gameResult: null, quickQuestion: null };
 
   private game!: Game;
 
@@ -34,8 +35,10 @@ class PageWithScene extends React.Component<IGameProps> {
       this.setTaskInProgress,
       this.removeTaskInProgress,
       this.setQuestion,
+      this.setQuickQuestion,
       this.resetState,
-      this.setGameResult
+      this.setGameResult,
+      this.returnHome
     );
     this.game.load();
     this.game.start();
@@ -59,6 +62,10 @@ class PageWithScene extends React.Component<IGameProps> {
     this.setState({ question, taskInProgress: true });
   };
 
+  setQuickQuestion = (quickQuestion: any) => {
+    this.setState({ quickQuestion });
+  };
+
   removeTaskInProgress = () => {
     this.game.player.isSolving = false;
     this.setState({ taskInProgress: false });
@@ -74,6 +81,11 @@ class PageWithScene extends React.Component<IGameProps> {
 
   onCollectReward = () => {
     this.game.router.sendCollectReward((this.game.player.inSolvingAreaOf as Pickup).id);
+  };
+
+  onQuickQuestionAnswer = (answerId: number) => {
+    this.game.router.sendQuickQuestionAnswer((this.state.quickQuestion as any).id, answerId);
+    this.setState({ quickQuestion: null });
   };
 
   setGameResult = (gameResult: string) => {
@@ -97,6 +109,12 @@ class PageWithScene extends React.Component<IGameProps> {
           <GameResult
             hasWon={this.state.gameResult === GameStatus.WIN ? true : false}
             returnHome={this.returnHome}
+          />
+        )}
+        {this.state.quickQuestion && (
+          <QuickQuestion
+            question={this.state.quickQuestion}
+            onAnswer={this.onQuickQuestionAnswer}
           />
         )}
         {this.state.taskInProgress && (

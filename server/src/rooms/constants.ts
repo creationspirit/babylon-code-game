@@ -7,6 +7,8 @@ export enum MessageType {
   DISPLAY_REWARD = 'drew',
   USE_FUTURE_GADGET = 'ufg',
   FUTURE_GADGET_USED = 'fgu',
+  QUICK_QUESTION = 'qq',
+  QUICK_QUESTION_ANSWER = 'qqa',
 }
 
 export enum GameStatus {
@@ -26,4 +28,10 @@ export enum QuestionStatus {
 export enum Teams {
   BLUE = 'blu',
   RED = 'red',
+}
+
+export enum DudeMovementType {
+  RANDOM = 'random',
+  FOLLOW = 'follow',
+  TESTING = 'test',
 }
