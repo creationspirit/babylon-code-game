@@ -34,7 +34,7 @@
     "pg": "^7.11.0",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.18",
-    "validator": "^11.0.0",
+    "validator": "^13.7.0",
     "winston": "^3.2.1",
     "xhr2": "^0.2.0"
   },
