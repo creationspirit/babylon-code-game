@@ -53,7 +53,7 @@
     "concurrently": "^4.1.0",
     "errorhandler": "^1.5.1",
     "nodemon": "^1.19.0",
-    "shelljs": "^0.8.3",
+    "shelljs": "^0.8.5",
     "ts-node": "^8.1.0",
     "tslint": "^5.16.0",
     "tslint-config-prettier": "^1.18.0",
